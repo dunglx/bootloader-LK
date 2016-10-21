@@ -697,8 +697,8 @@ int boot_linux_from_mmc(void)
 #endif
 	if (check_format_bit())
 		boot_into_recovery = 1;
-
-	if (!boot_into_recovery) {
+	// DungLX comment to disable reading from misc partition
+	/*if (!boot_into_recovery) {
 		memset(ffbm_mode_string, '\0', sizeof(ffbm_mode_string));
 		rcode = get_ffbm(ffbm_mode_string, sizeof(ffbm_mode_string));
 		if (rcode <= 0) {
@@ -708,7 +708,8 @@ int boot_linux_from_mmc(void)
 		} else
 			boot_into_ffbm = true;
 	} else
-		boot_into_ffbm = false;
+		boot_into_ffbm = false;*/
+	dprintf(CRITICAL, "DungLX check ffbm string: %s\n", ffbm_mode_string);
 	uhdr = (struct boot_img_hdr *)EMMC_BOOT_IMG_HEADER_ADDR;
 	if (!memcmp(uhdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 		dprintf(INFO, "Unified boot method!\n");
@@ -2521,8 +2522,9 @@ void aboot_init(const struct app_descriptor *app)
 
 	/* Check if we should do something other than booting up */
 	if (keys_get_state(KEY_VOLUMEUP) && keys_get_state(KEY_VOLUMEDOWN))
-	{
-		dprintf(ALWAYS,"dload mode key sequence detected\n");
+	{	
+		// DungLX comment checking key pressed to enter Download mode
+		/*dprintf(ALWAYS,"dload mode key sequence detected\n");
 		if (set_download_mode(EMERGENCY_DLOAD))
 		{
 			dprintf(CRITICAL,"dload mode not supported by target\n");
@@ -2532,7 +2534,11 @@ void aboot_init(const struct app_descriptor *app)
 			reboot_device(0);
 			dprintf(CRITICAL,"Failed to reboot into dload mode\n");
 		}
-		boot_into_fastboot = true;
+		boot_into_fastboot = true;*/
+		// DungLX add to enter ffbm when both volume keys pressed 
+		boot_into_ffbm = true;
+		strlcpy(ffbm_mode_string, "ffbm-01", sizeof(ffbm_mode_string));
+		dprintf(CRITICAL, "DungLX check key pressed into ffbm: %s\n", ffbm_mode_string);
 	}
 	if (!boot_into_fastboot)
 	{
